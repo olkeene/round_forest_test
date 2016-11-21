@@ -1,0 +1,43 @@
+version: '2'
+services:
+  app:
+    build: .
+    command: ./bin/startup.sh
+    volumes:
+      - .:/app
+    volumes_from:
+      - box
+    env_file:
+      - ./.docker/db.env
+    ports:
+      - '5000:5000'
+    links:
+      - db
+      - elasticsearch
+
+  db:
+    image: sameersbn/postgresql
+    ports:
+      - 5432
+    env_file:
+      - ./.docker/db.env
+    volumes:
+      - postgres:/var/lib/postgresql
+
+  elasticsearch:
+    image: elasticsearch:2.4.1
+    # NOTE v5 has issue with head size, so use v2
+    # environment:
+    #   ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  box:
+    image: busybox
+    volumes:
+      - box:/box
+
+volumes:
+  box:
+  postgres:
+  elasticsearch_data:
